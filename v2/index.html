@@ -29,6 +29,8 @@
   --action-bg: #7446d6;
   --action-bg-hover: #6237c0;
   --danger-solid: #c62828;
+  --wa-bg: #128c7e;
+  --wa-bg-hover: #0e7065;
 
   /* Header text (on the light purple band) */
   --on-ink: #2a1a55;
@@ -639,7 +641,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 /* =========================================================
    Help dialog (shown once, 10 s after the page loads)
    ========================================================= */
-.welcome-dialog {
+.welcome-dialog,
+.wa-dialog {
   width: min(420px, calc(100vw - 32px));
   padding: var(--space-5);
   border: 1px solid var(--rule);
@@ -648,11 +651,61 @@ button, input, select, textarea { font: inherit; color: inherit; }
   color: var(--ink);
   box-shadow: 0 10px 30px rgba(42, 26, 85, 0.25);
 }
-.welcome-dialog::backdrop { background: rgba(16, 12, 28, 0.45); }
+.welcome-dialog::backdrop,
+.wa-dialog::backdrop { background: rgba(16, 12, 28, 0.45); }
 .welcome-dialog h2 { margin: 0 0 var(--space-2); font-size: 1.15rem; }
 .welcome-dialog p { margin: 0 0 var(--space-4); color: var(--ink-2); line-height: 1.5; }
 .welcome-dialog a { color: var(--ledger); font-weight: 600; white-space: nowrap; }
 .welcome-actions { display: flex; justify-content: flex-end; }
+
+/* =========================================================
+   WhatsApp support: floating button + suggested questions dialog
+   ========================================================= */
+/* Sits under the drawer (z-index 40), so it never covers the Add Task submit button */
+.wa-fab {
+  position: fixed;
+  right: var(--space-4);
+  bottom: var(--space-4);
+  z-index: 35;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--wa-bg);
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(42, 26, 85, 0.3);
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+.wa-fab:hover { background: var(--wa-bg-hover); transform: translateY(-2px); }
+.wa-fab:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.wa-fab svg { width: 30px; height: 30px; }
+/* Keep the footer text clear of the button when scrolled to the bottom */
+.app-footer { padding-bottom: 88px; }
+
+.wa-dialog h2 { margin: 0 0 var(--space-1); font-size: 1.15rem; }
+.wa-dialog p { margin: 0 0 var(--space-4); color: var(--ink-2); font-size: var(--fs-sm); line-height: 1.5; }
+.wa-queries { display: grid; gap: var(--space-2); margin: 0 0 var(--space-4); padding: 0; list-style: none; }
+.wa-queries a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  color: var(--ink);
+  font-size: var(--fs-sm);
+  text-decoration: none;
+}
+.wa-queries a::after { content: "↗"; color: var(--ink-3); }
+.wa-queries a:hover { background: var(--ledger-tint); border-color: var(--rule-strong); }
+.wa-queries a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.wa-actions { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.wa-actions a { color: var(--ledger); font-size: var(--fs-sm); font-weight: 600; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none; transition: none; }
@@ -838,7 +891,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
   <p>Internal training demo. Not an official UOB system. All tasks and names are fictitious sample data.</p>
 </footer>
 
-<!-- Toast notifications (announced politely to screen readers) -->
 <dialog class="welcome-dialog" id="welcome-dialog" aria-labelledby="welcome-title">
   <h2 id="welcome-title">Thanks for visiting the IT PMO portal</h2>
   <p>If you need further assistance, call the IT support hotline on <a href="tel:12345678">12345678</a>.</p>
@@ -847,6 +899,24 @@ button, input, select, textarea { font: inherit; color: inherit; }
   </form>
 </dialog>
 
+<button type="button" class="wa-fab" id="wa-fab" aria-haspopup="dialog" aria-controls="wa-dialog" aria-label="Chat with IT support on WhatsApp">
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M12 2.5a9.5 9.5 0 0 0-8.2 14.3L2.5 21.5l4.8-1.3A9.5 9.5 0 1 0 12 2.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+    <path transform="translate(6.6 6.6) scale(0.45)" fill="currentColor" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+  </svg>
+</button>
+
+<dialog class="wa-dialog" id="wa-dialog" aria-labelledby="wa-title" aria-describedby="wa-intro">
+  <h2 id="wa-title">IT support on WhatsApp</h2>
+  <p id="wa-intro">Pick a question to start a chat with IT support. WhatsApp opens in a new tab.</p>
+  <ul class="wa-queries" id="wa-queries"></ul>
+  <form method="dialog" class="wa-actions">
+    <a id="wa-blank" target="_blank" rel="noopener">Ask something else</a>
+    <button type="submit" class="btn btn-secondary">Close</button>
+  </form>
+</dialog>
+
+<!-- Toast notifications (announced politely to screen readers) -->
 <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="false"></div>
 
 <!--
@@ -892,6 +962,17 @@ const CATEGORIES = [
 const PRIORITIES = ["Critical", "High", "Medium", "Low"];
 const PRIORITY_RANK = { Critical: 0, High: 1, Medium: 2, Low: 3 };
 const PRIORITY_GLYPH = { Critical: "▲▲", High: "▲", Medium: "■", Low: "▼" };
+
+// WhatsApp click-to-chat: country code 65 + 12345678, digits only
+const WHATSAPP_NUMBER = "6512345678";
+const WHATSAPP_QUERIES = [
+  "I can't log in or my password has expired",
+  "I need access to a system or shared folder",
+  "My laptop or VPN isn't working",
+  "Outlook or Teams isn't syncing",
+  "I'd like to request new software",
+  "I need help using the IT PMO board",
+];
 
 const LIMITS = { title: 80, description: 500, assignee: 60 };
 const DUE_SOON_DAYS = 3;
@@ -1461,8 +1542,8 @@ function handleDocumentClick(event) {
 }
 
 function handleKeydown(event) {
-  // The modal help dialog handles its own Escape; don't also close things behind it
-  if (dom.welcome.open) return;
+  // Modal dialogs handle their own Escape; don't also close things behind them
+  if (isDialogOpen()) return;
   if (event.key !== "Escape") return;
   const ui = state.ui;
   if (ui.openMoveId) {
@@ -1570,6 +1651,10 @@ function cacheDom() {
   dom.summaryOverdue = document.getElementById("summary-overdue");
   dom.toastRegion = document.getElementById("toast-region");
   dom.welcome = document.getElementById("welcome-dialog");
+  dom.waFab = document.getElementById("wa-fab");
+  dom.waDialog = document.getElementById("wa-dialog");
+  dom.waQueries = document.getElementById("wa-queries");
+  dom.waBlank = document.getElementById("wa-blank");
 }
 
 function populateSelects() {
@@ -1606,6 +1691,12 @@ function bindEvents() {
   dom.filterPriority.addEventListener("change", handleFilterChange);
   dom.filterAssignee.addEventListener("input", handleFilterChange);
   dom.filterClear.addEventListener("click", clearFilters);
+
+  dom.waFab.addEventListener("click", () => dom.waDialog.showModal());
+  // A chosen question opens WhatsApp in a new tab; close the dialog behind it
+  dom.waDialog.addEventListener("click", (event) => {
+    if (event.target.closest("a[href]")) dom.waDialog.close();
+  });
 }
 
 /* =========================================================
@@ -1615,13 +1706,32 @@ const WELCOME_DELAY_MS = 10000;
 
 function scheduleWelcome() {
   setTimeout(() => {
-    if (!dom.welcome.open) dom.welcome.showModal();
+    if (!isDialogOpen()) dom.welcome.showModal();
   }, WELCOME_DELAY_MS);
+}
+
+function isDialogOpen() {
+  return Boolean(document.querySelector("dialog[open]"));
+}
+
+/* =========================================================
+   WhatsApp support: suggested questions become prefilled chats
+   ========================================================= */
+function whatsappLink(message) {
+  const base = `https://wa.me/${WHATSAPP_NUMBER}`;
+  return message ? `${base}?text=${encodeURIComponent(message)}` : base;
+}
+
+function populateWhatsapp() {
+  dom.waQueries.innerHTML = WHATSAPP_QUERIES.map((q) => `
+    <li><a href="${escapeHtml(whatsappLink(`Hi IT support. ${q}.`))}" target="_blank" rel="noopener">${escapeHtml(q)}</a></li>`).join("");
+  dom.waBlank.href = whatsappLink("");
 }
 
 function init() {
   cacheDom();
   populateSelects();
+  populateWhatsapp();
   // Browsers may restore old control values on reload; start clean to match the reset board
   dom.form.reset();
   dom.filterAssignee.value = "";

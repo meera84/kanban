@@ -61,6 +61,7 @@ GitHub Pages deploys through `.github/workflows/pages.yml` on every push to `mai
   - The Add Task form is a fixed slide-over drawer (`#add-panel`), opened and closed by toggling the `.is-open` class through `setPanelOpen()`. Escape closes it.
   - The header's status bar sets each segment's `flex-grow` to its count. Its colours share the `--st-*` tokens with the column rules.
   - Toasts sit bottom-left, or at the top on phones, so they never cover the drawer's submit button.
+  - The floating WhatsApp button (`#wa-fab`, bottom-right, z-index below the drawer) opens the modal `#wa-dialog`. Its suggested questions come from `WHATSAPP_QUERIES` through `populateWhatsapp()`, and each is a `wa.me/<WHATSAPP_NUMBER>?text=…` link that opens in a new tab. It's a link, not a network call. `isDialogOpen()` stops the 10 s help dialog from opening on top of it and makes `handleKeydown()` leave Escape to the open dialog.
 - **v3 additions** (`v3/index.html` keeps the v2 points above and adds these):
   - `renderBoard()` also renders the summary section from the filtered tasks, so filters apply to the summary too:
     - `renderSummary()`: the headline, "Needs attention", and the status bar with its legend.
