@@ -74,6 +74,7 @@ GitHub Pages deploys through `.github/workflows/pages.yml` on every push to `mai
   - `deleteTask()` keeps `state.ui.lastDeleted`, and the toast's Undo button calls `undoDelete()`. `showToast()` takes `{ actionLabel, onAction }`.
   - `exportCsv()` downloads the filtered tasks as a one-off file (not persistence). `csvCell()` prefixes values that start with `= + - @` so spreadsheets don't run them as formulas.
   - Pressing `n` opens a new task unless focus is in a form field.
+- **Help dialog (all versions):** `scheduleWelcome()`, called at the end of `init()`, opens the native modal `<dialog id="welcome-dialog">` after `WELCOME_DELAY_MS` (10 s). It shows once per page load and gives the IT support hotline. `handleKeydown()` returns early while it's open, so Escape closes only the dialog.
 - **Add Task flow (optimistic):**
   1. Validate with `validateTask()`, which returns `{field: message}`.
   2. `addTask()` puts the card on the board.

@@ -636,6 +636,24 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .app-footer p { margin: 0; }
 .app-footer a { color: var(--ledger); }
 
+/* =========================================================
+   Help dialog (shown once, 10 s after the page loads)
+   ========================================================= */
+.welcome-dialog {
+  width: min(420px, calc(100vw - 32px));
+  padding: var(--space-5);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 10px 30px rgba(42, 26, 85, 0.25);
+}
+.welcome-dialog::backdrop { background: rgba(16, 12, 28, 0.45); }
+.welcome-dialog h2 { margin: 0 0 var(--space-2); font-size: 1.15rem; }
+.welcome-dialog p { margin: 0 0 var(--space-4); color: var(--ink-2); line-height: 1.5; }
+.welcome-dialog a { color: var(--ledger); font-weight: 600; white-space: nowrap; }
+.welcome-actions { display: flex; justify-content: flex-end; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none; transition: none; }
 }
@@ -821,6 +839,14 @@ button, input, select, textarea { font: inherit; color: inherit; }
 </footer>
 
 <!-- Toast notifications (announced politely to screen readers) -->
+<dialog class="welcome-dialog" id="welcome-dialog" aria-labelledby="welcome-title">
+  <h2 id="welcome-title">Thanks for visiting the IT PMO portal</h2>
+  <p>If you need further assistance, call the IT support hotline on <a href="tel:12345678">12345678</a>.</p>
+  <form method="dialog" class="welcome-actions">
+    <button type="submit" class="btn btn-primary">Got it</button>
+  </form>
+</dialog>
+
 <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="false"></div>
 
 <!--
@@ -1435,6 +1461,8 @@ function handleDocumentClick(event) {
 }
 
 function handleKeydown(event) {
+  // The modal help dialog handles its own Escape; don't also close things behind it
+  if (dom.welcome.open) return;
   if (event.key !== "Escape") return;
   const ui = state.ui;
   if (ui.openMoveId) {
@@ -1541,6 +1569,7 @@ function cacheDom() {
   dom.statusBar = document.getElementById("status-bar");
   dom.summaryOverdue = document.getElementById("summary-overdue");
   dom.toastRegion = document.getElementById("toast-region");
+  dom.welcome = document.getElementById("welcome-dialog");
 }
 
 function populateSelects() {
@@ -1579,6 +1608,17 @@ function bindEvents() {
   dom.filterClear.addEventListener("click", clearFilters);
 }
 
+/* =========================================================
+   Help dialog: once per page load, after 10 seconds on the page
+   ========================================================= */
+const WELCOME_DELAY_MS = 10000;
+
+function scheduleWelcome() {
+  setTimeout(() => {
+    if (!dom.welcome.open) dom.welcome.showModal();
+  }, WELCOME_DELAY_MS);
+}
+
 function init() {
   cacheDom();
   populateSelects();
@@ -1588,6 +1628,7 @@ function init() {
   seedTasks();
   bindEvents();
   renderBoard();
+  scheduleWelcome();
 }
 
 init();
