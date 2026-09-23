@@ -4,7 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A single-file IT PMO Kanban board (`index.html`), built as an internal demo/training tool. The page's HTML, CSS (in one `<style>`) and JS (in one `<script>`) all live in that one file.
+A single-file IT PMO Kanban board, built as an internal demo/training tool. Each version is one self-contained HTML file, with CSS in one `<style>` and JS in one `<script>`:
+
+- `index.html`: **version 1**, the original build. Don't redesign it.
+- `v2/index.html`: **version 2**, the redesign made with the `frontend-design` skill. New visual work goes here. Its footer links back to v1.
+
+Both versions share the same JS architecture (described below), so a behaviour fix usually belongs in both files.
 
 ## Hard constraints (from the original spec — keep them)
 
@@ -13,7 +18,9 @@ A single-file IT PMO Kanban board (`index.html`), built as an internal demo/trai
 - No external resources: no CDN, no web fonts, no image files. Icons are Unicode glyphs or inline SVG.
 - No persistence. Don't use localStorage, sessionStorage, IndexedDB or cookies. Refreshing resets the board to the seed data on purpose, and the header note says so.
 - The only network call is FormSubmit's AJAX endpoint.
-- Branding: a plain "UOB IT PMO" text wordmark in a corporate blue palette. Never add a real UOB logo or trademarks, and never imitate an official UOB system.
+- Branding: a plain "UOB IT PMO" text wordmark. Never add a real UOB logo or trademarks, and never imitate an official UOB system.
+  - v1 uses the original corporate blue palette.
+  - v2 uses a light purple palette, at the user's request. Its colours are all tokens at the top of `v2/index.html`, with matching dark-theme blocks.
 - No `alert()`/`confirm()`: validation errors appear inline and deletion is confirmed inline. No `!important` in CSS.
 
 ## Running / testing
@@ -22,7 +29,7 @@ There are no build, lint or test commands. Open `index.html` in a browser. Check
 
 ## Deployment
 
-GitHub Pages deploys through `.github/workflows/pages.yml` on every push to `main`. The workflow copies only `index.html` into `_site`, so any new file the page needs must be added to its "Assemble site" step. In the repo's Settings → Pages, Source must be set to "GitHub Actions". The live site is served over https, so FormSubmit works there, unlike from `file://`.
+GitHub Pages deploys through `.github/workflows/pages.yml` on every push to `main`. Its "Assemble site" step copies `index.html` to the site root and `v2/index.html` to `/v2/`. Any other file the pages need must be added to that step. In the repo's Settings → Pages, Source must be set to "GitHub Actions". The live site is served over https, so FormSubmit works there, unlike from `file://`.
 
 ## Architecture
 
@@ -44,6 +51,14 @@ GitHub Pages deploys through `.github/workflows/pages.yml` on every push to `mai
   - On `document`: Escape and clicking outside an open Move row.
 - **Dates:** kept as local `YYYY-MM-DD` strings, which compare correctly as text (see `isOverdue`). Seed due dates are offsets from today, so the demo always has overdue items.
 - **IDs:** `nextTaskId()` returns `UOB-ITPM-####`, zero-padded, from `state.nextId`.
+- **v2 layout** (the next four points apply to `v2/index.html` only; v1 uses a sidebar and summary tiles):
+  - The lanes use CSS subgrid (`.board` rows `auto 1fr`, `.column` spans 2 rows) so column headers share a row track and card tops line up. Below 768px the lanes switch back to a flex stack.
+  - `state.ui.flashId` marks the card that just moved or was added. `renderBoard()` gives it `.is-flash` once, then clears it.
+  - On Blocked cards the description gets `.is-blocker` and shows up to 3 lines. Elsewhere it's clamped to 1 line.
+  - Colours are theme tokens with light and dark blocks. Solid fills (`--header-bg`, `--action-bg`, `--danger-solid`) have their own tokens because `--ink` flips to a light colour in dark mode.
+  - The Add Task form is a fixed slide-over drawer (`#add-panel`), opened and closed by toggling the `.is-open` class through `setPanelOpen()`. Escape closes it.
+  - The header's status bar sets each segment's `flex-grow` to its count. Its colours share the `--st-*` tokens with the column rules.
+  - Toasts sit bottom-left, or at the top on phones, so they never cover the drawer's submit button.
 - **Add Task flow (optimistic):**
   1. Validate with `validateTask()`, which returns `{field: message}`.
   2. `addTask()` puts the card on the board.
