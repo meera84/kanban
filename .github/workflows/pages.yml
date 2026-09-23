@@ -27,9 +27,10 @@ jobs:
       # Publish only the app itself, not repo docs such as CLAUDE.md
       - name: Assemble site
         run: |
-          mkdir -p _site/v2
+          mkdir -p _site/v2 _site/v3
           cp index.html _site/
           cp v2/index.html _site/v2/
+          cp v3/index.html _site/v3/
 
       - uses: actions/configure-pages@v5
 
