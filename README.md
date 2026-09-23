@@ -4,6 +4,8 @@ A single-file IT PMO Kanban board: one `index.html` with inline CSS and JavaScri
 
 **Live demo:** https://meera84.github.io/kanban/
 
+![Screenshot of the Kanban board with sample tasks across the four columns](docs/screenshot.png)
+
 > Demo only. The board holds its state in memory, so refreshing the page resets it to the sample tasks. All sample data is fictitious, and the page is not an official system of any organisation.
 
 ## Features
@@ -52,6 +54,8 @@ The repo deploys to GitHub Pages through GitHub Actions (`.github/workflows/page
 index.html                    The whole app: markup, <style> and <script>
 .github/workflows/pages.yml   GitHub Pages deployment
 CLAUDE.md                     Architecture notes and project constraints
+docs/screenshot.png           README screenshot (not part of the deployed site)
+.mcp.json                     Project-level Playwright MCP server for Claude Code
 ```
 
 ## Constraints
