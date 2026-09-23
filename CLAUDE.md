@@ -20,6 +20,10 @@ A single-file IT PMO Kanban board (`index.html`), built as an internal demo/trai
 
 There are no build, lint or test commands. Open `index.html` in a browser. Check drag and drop by hand, because simulated drag events aren't reliable.
 
+## Deployment
+
+GitHub Pages deploys through `.github/workflows/pages.yml` on every push to `main`. The workflow copies only `index.html` into `_site`, so any new file the page needs must be added to its "Assemble site" step. In the repo's Settings → Pages, Source must be set to "GitHub Actions". The live site is served over https, so FormSubmit works there, unlike from `file://`.
+
 ## Architecture
 
 - **One source of truth:** `state = { tasks, filters, nextId, ui }`.
